@@ -19,6 +19,24 @@ if [ -z "$CODE" ]; then
 fi
 
 [ -s "$LCOV" ] || { echo 'Coverage report is missing or empty.' >&2; exit 1; }
+# Standard coverage reporters use app-relative paths; diff-cover runs at the Git root.
+# Keep the original LCOV unchanged for the standard dashboard.
+ROOT_LCOV=MyApp/coverage/lcov.repo.info
+node - "$LCOV" "$ROOT_LCOV" <<'NODE'
+const fs = require('node:fs');
+const path = require('node:path');
+const [input, output] = process.argv.slice(2);
+const root = process.cwd();
+const report = fs.readFileSync(input, 'utf8').replace(/^SF:(.+)$/gm, (_, file) => {
+  const absolute = path.isAbsolute(file) || file.startsWith('MyApp/')
+    ? path.resolve(root, file)
+    : path.resolve(root, 'MyApp', file);
+  return `SF:${path.relative(root, absolute).split(path.sep).join('/')}`;
+});
+fs.writeFileSync(output, report);
+NODE
+[ "$?" -eq 0 ] || exit 1
+LCOV="$ROOT_LCOV"
 { [ "$(grep -c '^SF:' "$LCOV")" -eq "$(grep -c '^end_of_record$' "$LCOV")" ] && grep -q '^DA:' "$LCOV"; } \
   || { echo 'Coverage report is incomplete.' >&2; exit 1; }
 MISSING=$(printf '%s\n' "$CODE" | while IFS= read -r file; do grep -Fqx "SF:$file" "$LCOV" || printf '%s\n' "$file"; done)

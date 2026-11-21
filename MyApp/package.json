@@ -25,7 +25,6 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "TZ=UTC LC_ALL=en_US.UTF-8 jest",
     "test:watch": "npm test -- --watch",
@@ -35,11 +34,13 @@
     "test:all-platforms": "JEST_ALL_PLATFORMS=true npm test --",
     "test:integration": "npm test -- --testPathPatterns='\\.integration\\.test\\.'",
     "test:random": "npm run test:all-platforms -- --randomize",
-    "test:coverage": "npm test -- --coverage",
+    "test:coverage": "npm test -- --coverage --coverageReporters=lcov --coverageReporters=cobertura --coverageReporters=json-summary --coverageReporters=text-summary",
     "test:coverage:diff": "sh scripts/check-diff-coverage.sh",
     "test:report": "rm -rf allure-results allure-report && allure run -- npm run test:coverage",
     "test:report:generate": "allure generate",
     "test:report:open": "allure open allure-report",
+    "test:dashboard": "node scripts/test-dashboard.mjs --run --serve --open",
+    "test:dashboard:open": "node scripts/test-dashboard.mjs --serve --open",
     "test:report:view": "node scripts/test-report-view.mjs"
   },
   "overrides": {

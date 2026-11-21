@@ -37,6 +37,7 @@ yarn-error.*
 *.tsbuildinfo
 
 # test reports
+test-dashboard/
 coverage/
 allure-results/
 allure-report/

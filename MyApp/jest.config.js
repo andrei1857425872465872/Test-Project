@@ -38,6 +38,7 @@ module.exports = {
     ['lcov', { projectRoot: require('node:path').resolve(__dirname, '..') }],
     'cobertura',
     'text-summary',
+    'json-summary',
   ],
   projects: [
     { ...common, displayName: 'ios', preset: 'jest-expo/ios' },
