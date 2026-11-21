@@ -1,0 +1,2396 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tests</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --panel: #ffffff;
+        --text: #1d2330;
+        --muted: #6b7280;
+        --border: #e3e6eb;
+        --accent: #4f46e5;
+        --accent-soft: #eef0ff;
+        --passed: #16a34a;
+        --passed-soft: #e8f6ee;
+        --failed: #dc2626;
+        --failed-soft: #fdecec;
+        --broken: #d97706;
+        --broken-soft: #fdf3e2;
+        --skipped: #6b7280;
+        --skipped-soft: #f0f1f3;
+        --code-bg: #fbfbfc;
+        --line-miss: #fde2e2;
+        --line-partial: #fdf1d6;
+        --line-hit: transparent;
+        --status-good: #0ca30c;
+        --status-warning: #fab219;
+        --status-critical: #d03b3b;
+        --status-neutral: #a3a8b2;
+        --magnitude: #4f46e5;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #11141a;
+          --panel: #191d25;
+          --text: #e6e8ec;
+          --muted: #9aa1ad;
+          --border: #2a303b;
+          --accent: #8b85ff;
+          --accent-soft: #252545;
+          --passed: #3fbf6f;
+          --passed-soft: #18301f;
+          --failed: #f26b6b;
+          --failed-soft: #3a1c1e;
+          --broken: #f0a33a;
+          --broken-soft: #3a2a14;
+          --skipped: #9aa1ad;
+          --skipped-soft: #252a33;
+          --code-bg: #151920;
+          --line-miss: #4a1f22;
+          --line-partial: #45361a;
+          --magnitude: #8b85ff;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          14px/1.45 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--panel);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 24px 0;
+      }
+      .title-row {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-top: 10px;
+      }
+      .tab {
+        border: 0;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+      }
+      .tab.active {
+        color: var(--text);
+        border-bottom-color: var(--accent);
+      }
+      main {
+        padding: 16px 24px 48px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .cards {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 16px;
+        min-width: 120px;
+      }
+      .card .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .card .value {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .card .sub {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .toolbar {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      .search {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--text);
+        font: inherit;
+      }
+      .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .filter-name {
+        color: var(--muted);
+        font-size: 12px;
+        min-width: 70px;
+      }
+      .chip {
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 2px 10px;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .chip .count {
+        color: var(--muted);
+        margin-left: 4px;
+      }
+      .chip.on {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .chip.on .count {
+        color: inherit;
+      }
+      .link-button {
+        border: 0;
+        background: none;
+        color: var(--accent);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 2px 4px;
+      }
+      select {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+        font: inherit;
+        font-size: 12px;
+        padding: 2px 6px;
+      }
+      .list {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .empty {
+        padding: 32px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .file-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border-top: 1px solid var(--border);
+        cursor: pointer;
+      }
+      .file-row:first-child {
+        border-top: 0;
+      }
+      .file-row:hover {
+        background: var(--bg);
+      }
+      .caret {
+        width: 12px;
+        color: var(--muted);
+      }
+      .file-path {
+        flex: 1;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12.5px;
+        word-break: break-all;
+      }
+      .file-path .dir {
+        color: var(--muted);
+      }
+      .badges {
+        display: flex;
+        gap: 4px;
+      }
+      .badge {
+        border-radius: 999px;
+        padding: 0 8px;
+        font-size: 11.5px;
+        font-weight: 600;
+      }
+      .badge.passed {
+        background: var(--passed-soft);
+        color: var(--passed);
+      }
+      .badge.failed {
+        background: var(--failed-soft);
+        color: var(--failed);
+      }
+      .badge.broken {
+        background: var(--broken-soft);
+        color: var(--broken);
+      }
+      .badge.skipped {
+        background: var(--skipped-soft);
+        color: var(--skipped);
+      }
+      .kind {
+        font-size: 11px;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0 5px;
+      }
+      .test-row {
+        padding: 6px 14px 6px 40px;
+        border-top: 1px dashed var(--border);
+      }
+      .test-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: none;
+      }
+      .dot.passed {
+        background: var(--passed);
+      }
+      .dot.failed {
+        background: var(--failed);
+      }
+      .dot.broken {
+        background: var(--broken);
+      }
+      .dot.skipped {
+        background: var(--skipped);
+      }
+      .test-name {
+        flex: 1;
+      }
+      .test-name .suite {
+        color: var(--muted);
+      }
+      .platform {
+        font-size: 11px;
+        border-radius: 4px;
+        padding: 0 6px;
+        font-weight: 600;
+      }
+      .duration {
+        color: var(--muted);
+        font-size: 12px;
+        min-width: 56px;
+        text-align: right;
+      }
+      .details {
+        margin: 8px 0 8px 17px;
+        display: grid;
+        gap: 10px;
+      }
+      .details h4 {
+        margin: 0 0 4px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 3px 14px;
+        margin: 0;
+        font-size: 12.5px;
+      }
+      .info-grid dt {
+        color: var(--muted);
+      }
+      .info-grid dd {
+        margin: 0;
+        word-break: break-all;
+      }
+      .command {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .command code {
+        flex: 1;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font:
+          12px/1.5 ui-monospace,
+          Menlo,
+          monospace;
+        word-break: break-all;
+      }
+      .copy {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        border-radius: 6px;
+        font: inherit;
+        font-size: 12px;
+        padding: 5px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .run-block {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+        display: grid;
+        gap: 8px;
+      }
+      .run-head {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 12.5px;
+      }
+      .run-head .muted {
+        font-size: 12px;
+      }
+      .history {
+        display: inline-flex;
+        gap: 3px;
+        align-items: center;
+      }
+      .history i {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+      }
+      .history i.current {
+        outline: 2px solid var(--text);
+        outline-offset: 1px;
+      }
+      .hooks {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .hook {
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0 6px;
+      }
+      .hook.failed,
+      .hook.broken {
+        border-color: var(--failed);
+        color: var(--failed);
+      }
+      pre {
+        margin: 0;
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 10px;
+        overflow: auto;
+        max-height: 360px;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 7px 12px;
+        border-top: 1px solid var(--border);
+        text-align: left;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 12px;
+        border-top: 0;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+      }
+      th.num,
+      td.num {
+        text-align: right;
+      }
+      tbody tr {
+        cursor: pointer;
+      }
+      tbody tr:hover {
+        background: var(--bg);
+      }
+      tbody tr.selected {
+        background: var(--accent-soft);
+      }
+      .pct {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .bar {
+        width: 70px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border);
+        overflow: hidden;
+      }
+      .bar > span {
+        display: block;
+        height: 100%;
+      }
+      .ok {
+        color: var(--passed);
+      }
+      .warn {
+        color: var(--broken);
+      }
+      .bad {
+        color: var(--failed);
+      }
+      .bar .ok {
+        background: var(--passed);
+      }
+      .bar .warn {
+        background: var(--broken);
+      }
+      .bar .bad {
+        background: var(--failed);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .viewer {
+        margin-top: 14px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .viewer-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+      .viewer-head .file-path {
+        flex: 1;
+      }
+      .legend {
+        display: flex;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .legend i {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 4px;
+        vertical-align: -1px;
+      }
+      .code {
+        max-height: 70vh;
+        overflow: auto;
+        font:
+          12px/1.55 ui-monospace,
+          Menlo,
+          monospace;
+        background: var(--code-bg);
+      }
+      .code-line {
+        display: flex;
+        white-space: pre;
+      }
+      .code-line.miss {
+        background: var(--line-miss);
+      }
+      .code-line.partial {
+        background: var(--line-partial);
+      }
+      .ln {
+        width: 52px;
+        flex: none;
+        text-align: right;
+        padding-right: 10px;
+        color: var(--muted);
+        user-select: none;
+      }
+      .hits {
+        width: 52px;
+        flex: none;
+        text-align: right;
+        padding-right: 10px;
+        color: var(--muted);
+        user-select: none;
+      }
+      .code-line.miss .hits {
+        color: var(--failed);
+        font-weight: 700;
+      }
+      .src {
+        padding-right: 16px;
+      }
+      .hidden {
+        display: none;
+      }
+      .chart-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px 10px;
+        margin-bottom: 14px;
+      }
+      .chart-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+      .chart-title {
+        font-weight: 600;
+      }
+      .chart-title .muted {
+        font-weight: 400;
+        font-size: 12px;
+        margin-left: 6px;
+      }
+      .legend-items {
+        display: flex;
+        gap: 14px;
+        font-size: 12px;
+        color: var(--muted);
+        flex-wrap: wrap;
+      }
+      .swatch {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        margin-right: 5px;
+        vertical-align: -1px;
+      }
+      .chart-row {
+        display: grid;
+        grid-template-columns: 130px 1fr 230px;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 5px 6px;
+        border: 0;
+        border-radius: 6px;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+      .chart-row:hover {
+        background: var(--bg);
+      }
+      .chart-row.on {
+        background: var(--accent-soft);
+      }
+      .chart-row .name {
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .chart-row.total .name {
+        color: var(--muted);
+      }
+      .stack {
+        display: flex;
+        gap: 2px;
+        height: 14px;
+      }
+      .stack > span {
+        height: 100%;
+        min-width: 3px;
+      }
+      .stack > span:first-child {
+        border-radius: 4px 0 0 4px;
+      }
+      .stack > span:last-child {
+        border-radius: 0 4px 4px 0;
+      }
+      .stack > span:only-child {
+        border-radius: 4px;
+      }
+      .track {
+        height: 14px;
+      }
+      .track > span {
+        display: block;
+        height: 100%;
+        min-width: 3px;
+        border-radius: 0 4px 4px 0;
+        background: var(--magnitude);
+      }
+      .figure {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: right;
+        white-space: nowrap;
+      }
+      .figure b {
+        color: var(--text);
+      }
+      .chart-foot {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 6px 6px 2px;
+      }
+      #tooltip {
+        position: fixed;
+        z-index: 20;
+        display: none;
+        pointer-events: none;
+        max-width: 320px;
+        background: var(--panel);
+        color: var(--text);
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        font-size: 12.5px;
+        line-height: 1.45;
+        padding: 8px 11px;
+        border-radius: 8px;
+      }
+      #tooltip .tip-title {
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      #tooltip .tip-context {
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 3px;
+      }
+      #tooltip .tip-text {
+        color: var(--muted);
+      }
+      [data-help]:not(button) {
+        cursor: help;
+      }
+      .filter-name[data-help],
+      .card .label[data-help],
+      th[data-help],
+      .legend-items [data-help],
+      .legend [data-help] {
+        text-decoration: underline dotted;
+        text-decoration-color: var(--muted);
+        text-underline-offset: 3px;
+      }
+      tbody tr.viewer-row {
+        cursor: default;
+      }
+      tbody tr.viewer-row:hover {
+        background: none;
+      }
+      tr.viewer-row > td {
+        padding: 0 12px 12px;
+        border-top: 0;
+      }
+      tr.viewer-row .viewer {
+        margin-top: 0;
+      }
+      @media (max-width: 700px) {
+        .chart-row {
+          grid-template-columns: 90px 1fr;
+        }
+        .chart-row .figure {
+          grid-column: 1 / -1;
+          text-align: left;
+        }
+        header,
+        main {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        .hide-mobile {
+          display: none;
+        }
+        .test-row {
+          padding-left: 24px;
+        }
+      }
+
+      .title-row {
+        align-items: center;
+      }
+      .section-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .report-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 6px 12px;
+        color: var(--accent);
+        background: var(--panel);
+        font-weight: 600;
+        font-size: 13px;
+        text-decoration: none;
+      }
+      .report-link:hover {
+        background: var(--accent-soft);
+      }
+      .lang-switch {
+        margin-left: auto;
+        display: flex;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .lang-switch button {
+        border: 0;
+        background: none;
+        color: var(--muted);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        cursor: pointer;
+      }
+      .lang-switch button.on {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tooltip" role="tooltip"></div>
+    <header>
+      <div class="title-row">
+        <h1 id="title">Tests</h1>
+        <span class="meta" id="meta"></span>
+        <div class="lang-switch" id="lang-switch">
+          <button data-lang="ru">RU</button>
+          <button data-lang="en">EN</button>
+        </div>
+      </div>
+      <nav class="tabs">
+        <button class="tab active" data-tab="tests"></button>
+        <button class="tab" data-tab="coverage"></button>
+      </nav>
+    </header>
+    <main>
+      <section id="tests-section"></section>
+      <section id="coverage-section" class="hidden"></section>
+    </main>
+
+    <script>
+      const DATA = /*__DATA__*/ null;
+
+      // ---------- Language ----------
+      const LANG_STORAGE_KEY = "test-dashboard-lang";
+      const LANGS = ["ru", "en"];
+      const readSavedLang = () => {
+        try {
+          return localStorage.getItem(LANG_STORAGE_KEY);
+        } catch {
+          return null;
+        }
+      };
+      let lang = LANGS.includes(readSavedLang()) ? readSavedLang() : "ru";
+
+      // Russian plural: one / few / many.
+      const ruPlural = (count, [one, few, many]) => {
+        const mod10 = count % 10;
+        const mod100 = count % 100;
+        if (mod10 === 1 && mod100 !== 11) return one;
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14))
+          return few;
+        return many;
+      };
+
+      const TEXT = {
+        ru: {
+          tabTests: "Тесты",
+          tabCoverage: "Покрытие",
+          openAllure: "Открыть полный отчёт в Allure ↗",
+          openCoverage: "Открыть подробный отчёт покрытия ↗",
+          meta: (run, coverage, built) =>
+            `Прогон тестов: ${run} · Покрытие: ${coverage} · Собрано: ${built}`,
+          status: {
+            passed: "успешно",
+            failed: "упал",
+            broken: "сломан",
+            skipped: "пропущен",
+          },
+          kind: {
+            all: "все тесты",
+            unit: "юнит",
+            component: "компонентные",
+            integration: "интеграционные",
+            security: "безопасность",
+            other: "другие",
+          },
+          level: { bad: "плохо", warn: "близко", ok: "норма" },
+          filter: {
+            Status: "Статус",
+            Kind: "Вид",
+            Platform: "Платформа",
+            Module: "Модуль",
+            Level: "Уровень",
+            View: "Вид таблицы",
+            Sort: "Сортировка",
+          },
+          clear: "сбросить",
+          runs: "Запуски",
+          testsAndFiles: (tests, files) =>
+            `${tests} ${ruPlural(tests, ["тест", "теста", "тестов"])} · ${files} ${ruPlural(files, ["файл", "файла", "файлов"])}`,
+          resultsByKind: "Результаты по видам тестов",
+          clickToFilter: "нажмите на строку, чтобы отфильтровать",
+          passedShare: "прошло",
+          failing: (count) =>
+            `${count} ${ruPlural(count, ["падает", "падают", "падают"])}`,
+          noFailures: "без падений",
+          runsCount: (count) =>
+            `${count} ${ruPlural(count, ["запуск", "запуска", "запусков"])}`,
+          searchTests:
+            "Поиск по названию теста, describe, файлу или тексту ошибки",
+          sortStatus: "Сначала упавшие",
+          sortName: "По имени файла",
+          sortDuration: "Сначала медленные",
+          expandAll: "развернуть все",
+          collapseAll: "свернуть все",
+          noTests: "Нет тестов под выбранные фильтры.",
+          runsInFile: (count, status) =>
+            `${count} ${ruPlural(count, ["запуск", "запуска", "запусков"])} в файле: ${status}`,
+          runTip: (platform, status, duration) =>
+            `${platform}: ${status} за ${duration}`,
+          file: "Файл",
+          describe: "Describe",
+          kindLabel: "Вид",
+          module: "Модуль",
+          runLocally: "Запустить локально",
+          copy: "Скопировать",
+          copied: "Скопировано",
+          copyManually: "Выделите и скопируйте",
+          started: "старт",
+          error: "Ошибка",
+          stack: "Стек вызовов",
+          hooks: "Подготовка и очистка:",
+          setup: "подготовка",
+          teardown: "очистка",
+          historyTip: (date, status) => `${date} · ${status}`,
+          statements: "Операторы",
+          lines: "Строки",
+          branches: "Ветки",
+          functions: "Функции",
+          files: "Файлы",
+          uncoveredLines: "Непокрытые строки",
+          uncoveredLinesCount: (count) =>
+            `${count} ${ruPlural(count, ["непокрытая строка", "непокрытые строки", "непокрытых строк"])}`,
+          folder: "Папка",
+          viewFiles: "Файлы",
+          viewFolders: "Папки",
+          levelByLines: "Уровень по строкам",
+          searchFiles: "Поиск по пути к файлу",
+          noCoverage:
+            'Нет данных о покрытии. Сначала выполните "npm run test:report".',
+          noFiles: "Нет файлов под выбранные фильтры.",
+          uncoveredBy: (unit) => `Не покрыто тестами по модулям: ${unit}`,
+          largestFirst:
+            "сначала самые большие пробелы · нажмите на строку, чтобы отфильтровать",
+          uncoveredShort: "не покрыто",
+          coveredShort: "покрыто",
+          moduleTip: (module, missing, found, unit, pct) =>
+            `${module} · не покрыто ${missing} из ${found} (${unit}), покрытие ${pct}%`,
+          everythingCovered: "Всё покрыто.",
+          fullyCovered: (count) => `Полностью покрыты (${count}):`,
+          unit: {
+            statements: "операторы",
+            lines: "строки",
+            branches: "ветки",
+            functions: "функции",
+          },
+          cellTip: (hit, found, unit) =>
+            `покрыто ${hit} из ${found} (${unit}), не покрыто ${found - hit}`,
+          nothingToCover: "нечего покрывать",
+          linesList: (list) => `Строки ${list}`,
+          andMore: (count) => `и ещё ${count}`,
+          notRun: "не выполнялась",
+          branchNotTaken: "ветка не выполнялась",
+          nextUncovered: "следующая непокрытая ↓",
+          close: "закрыть",
+          sourceMissing: "Исходный файл не найден.",
+          kindTip: (label, status, count, total, pct) =>
+            `${label} · ${status}: ${count} из ${total} (${pct}%)`,
+        },
+        en: {
+          tabTests: "Tests",
+          tabCoverage: "Coverage",
+          openAllure: "Open the full Allure report ↗",
+          openCoverage: "Open the detailed coverage report ↗",
+          meta: (run, coverage, built) =>
+            `Tests run: ${run} · Coverage: ${coverage} · Built: ${built}`,
+          status: {
+            passed: "passed",
+            failed: "failed",
+            broken: "broken",
+            skipped: "skipped",
+          },
+          kind: {
+            all: "all tests",
+            unit: "unit",
+            component: "component",
+            integration: "integration",
+            security: "security",
+            other: "other",
+          },
+          level: { bad: "bad", warn: "close", ok: "ok" },
+          filter: {
+            Status: "Status",
+            Kind: "Kind",
+            Platform: "Platform",
+            Module: "Module",
+            Level: "Level",
+            View: "View",
+            Sort: "Sort",
+          },
+          clear: "clear",
+          runs: "Runs",
+          testsAndFiles: (tests, files) => `${tests} tests · ${files} files`,
+          resultsByKind: "Results by kind",
+          clickToFilter: "click a row to filter",
+          passedShare: "passed",
+          failing: (count) => `${count} failing`,
+          noFailures: "no failures",
+          runsCount: (count) => `${count} runs`,
+          searchTests: "Search by test name, describe, file or error text",
+          sortStatus: "Failures first",
+          sortName: "File name",
+          sortDuration: "Slowest first",
+          expandAll: "expand all",
+          collapseAll: "collapse all",
+          noTests: "No tests match the filters.",
+          runsInFile: (count, status) =>
+            `${count} ${status} run${count === 1 ? "" : "s"} in this file`,
+          runTip: (platform, status, duration) =>
+            `${platform}: ${status} in ${duration}`,
+          file: "File",
+          describe: "Describe",
+          kindLabel: "Kind",
+          module: "Module",
+          runLocally: "Run locally",
+          copy: "Copy",
+          copied: "Copied",
+          copyManually: "Select and copy",
+          started: "started",
+          error: "Error",
+          stack: "Stack trace",
+          hooks: "Set up / tear down:",
+          setup: "set up",
+          teardown: "tear down",
+          historyTip: (date, status) => `${date} · ${status}`,
+          statements: "Statements",
+          lines: "Lines",
+          branches: "Branches",
+          functions: "Functions",
+          files: "Files",
+          uncoveredLines: "Uncovered lines",
+          uncoveredLinesCount: (count) =>
+            `${count} uncovered line${count === 1 ? "" : "s"}`,
+          folder: "Folder",
+          viewFiles: "Files",
+          viewFolders: "Folders",
+          levelByLines: "Level by lines",
+          searchFiles: "Search by file path",
+          noCoverage: 'No coverage data. Run "npm run test:report" first.',
+          noFiles: "No files match the filters.",
+          uncoveredBy: (unit) => `Uncovered ${unit} by module`,
+          largestFirst: "largest gap first · click a row to filter",
+          uncoveredShort: "uncovered",
+          coveredShort: "covered",
+          moduleTip: (module, missing, found, unit, pct) =>
+            `${module} · ${missing} of ${found} ${unit} not covered (${pct}% covered)`,
+          everythingCovered: "Everything is covered.",
+          fullyCovered: (count) => `Fully covered (${count}):`,
+          unit: {
+            statements: "statements",
+            lines: "lines",
+            branches: "branches",
+            functions: "functions",
+          },
+          cellTip: (hit, found, unit) =>
+            `${hit} of ${found} ${unit} covered, ${found - hit} not`,
+          nothingToCover: "nothing to cover",
+          linesList: (list) => `Lines ${list}`,
+          andMore: (count) => `and ${count} more`,
+          notRun: "not run",
+          branchNotTaken: "branch not taken",
+          nextUncovered: "next uncovered ↓",
+          close: "close",
+          sourceMissing: "Source file not found.",
+          kindTip: (label, status, count, total, pct) =>
+            `${label} · ${status}: ${count} of ${total} (${pct}%)`,
+        },
+      };
+      const t = () => TEXT[lang];
+
+      const thresholds = DATA.thresholds;
+      const HELP = {
+        ru: {
+          all: [
+            "Все тесты",
+            "Все запуски тестов на обеих платформах, независимо от выбранного вида.",
+          ],
+          unit: [
+            "Юнит-тесты",
+            "Проверяют одну функцию или хук отдельно: валидацию, расчёты, хуки viewModel. Файлы *.test.ts.",
+          ],
+          component: [
+            "Компонентные тесты",
+            "Рендерят один компонент и проверяют, что видит пользователь и как компонент реагирует на нажатия (React Native Testing Library). Файлы *.test.tsx.",
+          ],
+          integration: [
+            "Интеграционные тесты",
+            "Проверяют несколько частей вместе, обычно экран целиком с логикой и данными: мок API → хуки → UI. Файлы *.integration.test.tsx.",
+          ],
+          security: [
+            "Тесты безопасности",
+            "Сценарии атак из раздела 8 стандарта тестирования: токены, выход, deep links, повреждённые данные, секреты в логах. Красный тест здесь — реальный дефект в приложении. Файлы *.security.test.*.",
+          ],
+          other: [
+            "Другие тесты",
+            "Файлы, по имени которых нельзя определить вид теста.",
+          ],
+          passed: ["Успешно", "Все проверки выполнились."],
+          failed: [
+            "Упал",
+            "Не выполнилась проверка expect: код ведёт себя не так, как ожидает тест. Обычно это баг в приложении или устаревший тест.",
+          ],
+          broken: [
+            "Сломан",
+            "Тест упал вне своих проверок: исключение в коде или в подготовке теста.",
+          ],
+          skipped: ["Пропущен", "Тест не запускался: skip или todo."],
+          runs: [
+            "Запуски",
+            "Один запуск — один тест на одной платформе. Тест, который идёт на iOS и Android, даёт два запуска.",
+          ],
+          passRate: [
+            "Доля успешных",
+            "Доля запусков, которые прошли. «Падает» — это упавшие и сломанные вместе.",
+          ],
+          ios: [
+            "Запуск на iOS",
+            "Результат теста в Jest-проекте iOS (jest-expo/ios).",
+          ],
+          android: [
+            "Запуск на Android",
+            "Результат теста в Jest-проекте Android (jest-expo/android).",
+          ],
+          status: [
+            "Фильтр по статусу",
+            "Показывает только запуски с выбранными результатами.",
+          ],
+          kind: [
+            "Фильтр по виду",
+            "Юнит, компонентные, интеграционные или безопасность — определяется по имени файла теста.",
+          ],
+          platform: [
+            "Фильтр по платформе",
+            "Показывает только запуски на iOS или на Android.",
+          ],
+          module: [
+            "Модуль",
+            "Модуль приложения (src/modules/…) или папка ядра (src/core/…), к которой относится файл.",
+          ],
+          fileDuration: [
+            "Время файла",
+            "Суммарное время всех запусков в этом файле.",
+          ],
+          testDuration: [
+            "Время теста",
+            "Самый медленный из запусков этого теста.",
+          ],
+          history: [
+            "История",
+            "Этот тест на этой платформе в последних сохранённых прогонах, слева старые. Обведённый квадрат — текущий прогон. Разные цвета — нестабильный (flaky) тест.",
+          ],
+          hooks: [
+            "Подготовка и очистка",
+            "Хуки, которые Jest выполнил вокруг теста: beforeAll, beforeEach, afterEach, afterAll. Если хук упал, тест считается сломанным, даже если его собственные проверки в порядке.",
+          ],
+          command: [
+            "Запустить локально",
+            "Запускает только этот тест на iOS и Android из корня проекта. Вставьте команду в терминал.",
+          ],
+          statements: [
+            "Покрытие операторов",
+            "Доля операторов кода, которые тесты выполнили хотя бы раз. Близко к строкам, но строка с двумя операторами считается дважды.",
+          ],
+          lines: [
+            "Покрытие строк",
+            "Доля исполняемых строк, которые тесты выполнили хотя бы раз.",
+          ],
+          branches: [
+            "Покрытие веток",
+            "Доля путей if/else, ?:, &&, || и ??, по которым прошли тесты. Самая строгая метрика: строка может выполниться, а одна из её веток — нет.",
+          ],
+          functions: [
+            "Покрытие функций",
+            "Доля функций, которые тесты вызвали хотя бы раз.",
+          ],
+          files: [
+            "Файлы",
+            "Исходные файлы, для которых Jest измерил покрытие.",
+          ],
+          uncovered: [
+            "Непокрытые строки",
+            "Исполняемые строки, которые не выполнил ни один тест. Здесь не хватает тестов.",
+          ],
+          uncoveredModule: [
+            "Не покрыто по модулям",
+            "Сколько не покрыто в каждом модуле, сначала самые большие пробелы. Самая длинная полоса — там тесты принесут больше всего пользы.",
+          ],
+          level: [
+            "Уровень покрытия",
+            `Цвет по покрытию строк: плохо — ниже ${thresholds.bad}%, близко — ${thresholds.bad}–${thresholds.warn}%, норма — от ${thresholds.warn}%. Стандарт тестирования требует ${thresholds.warn}% изменённых строк.`,
+          ],
+          bad: [
+            `Ниже ${thresholds.bad}%`,
+            "Файлы с низким покрытием строк: начинать с них.",
+          ],
+          warn: [
+            `${thresholds.bad}–${thresholds.warn}%`,
+            "Близко к порогу стандарта тестирования.",
+          ],
+          ok: [
+            `${thresholds.warn}% и выше`,
+            "Порог стандарта тестирования выполнен.",
+          ],
+          view: [
+            "Вид таблицы",
+            "Файлы — каждый файл отдельно. Папки — итоги по папкам; нажмите на папку, чтобы увидеть её файлы.",
+          ],
+          allureReport: [
+            "Полный отчёт Allure",
+            "Отчёт по стандарту тестирования: история прогонов, графики, нестабильные тесты, хуки и вложения. Откроется в новой вкладке.",
+          ],
+          coverageReport: [
+            "Подробный отчёт покрытия",
+            "HTML-отчёт, который Jest строит при прогоне с покрытием: дерево папок и код каждого файла с подсветкой. Откроется в новой вкладке.",
+          ],
+          fileMode: [
+            "Страница открыта как файл",
+            "Allure не загрузит данные с диска. Запустите npm run test:dashboard: страница откроется через локальный сервер, и ссылка заработает.",
+          ],
+          notRun: ["Не выполнялась", "Ни один тест не выполнил эту строку."],
+          partial: [
+            "Ветка не выполнялась",
+            "Строка выполнилась, но одна из её веток (if/else, ?:, &&, ??) — нет.",
+          ],
+        },
+        en: {
+          all: [
+            "All tests",
+            "Every test run on both platforms, whatever kind is selected.",
+          ],
+          unit: [
+            "Unit tests",
+            "Check one function or hook in isolation: validation, calculations, view-model hooks. Files *.test.ts.",
+          ],
+          component: [
+            "Component tests",
+            "Render one component and check what the user sees and how it reacts to taps (React Native Testing Library). Files *.test.tsx.",
+          ],
+          integration: [
+            "Integration tests",
+            "Check several parts together, usually a whole screen with its logic and data: API mock → hooks → UI. Files *.integration.test.tsx.",
+          ],
+          security: [
+            "Security tests",
+            "Attack scenarios from section 8 of the testing standard: tokens, logout, deep links, corrupted data, secrets in logs. A red one means a real defect in the app. Files *.security.test.*.",
+          ],
+          other: ["Other tests", "Files whose name doesn't tell the kind."],
+          passed: ["Passed", "Every assertion held."],
+          failed: [
+            "Failed",
+            "An assertion (expect) did not hold: the code behaves differently from what the test expects. Usually a bug in the app or an outdated test.",
+          ],
+          broken: [
+            "Broken",
+            "The test crashed outside its assertions: an exception thrown by the code or by the test setup.",
+          ],
+          skipped: ["Skipped", "Not run: skipped or marked todo."],
+          runs: [
+            "Runs",
+            "One run = one test on one platform. A test that runs on iOS and Android counts as two runs.",
+          ],
+          passRate: [
+            "Pass rate",
+            "Share of runs that passed. Failing = failed + broken.",
+          ],
+          ios: [
+            "iOS run",
+            "Result of this test in the iOS Jest project (jest-expo/ios).",
+          ],
+          android: [
+            "Android run",
+            "Result of this test in the Android Jest project (jest-expo/android).",
+          ],
+          status: ["Status filter", "Show only runs with the chosen results."],
+          kind: [
+            "Kind filter",
+            "unit, component, integration or security, taken from the test file name.",
+          ],
+          platform: ["Platform filter", "Show only runs on iOS or on Android."],
+          module: [
+            "Module",
+            "Feature module (src/modules/…) or core folder (src/core/…) the file belongs to.",
+          ],
+          fileDuration: [
+            "File duration",
+            "Total time of all runs in this file.",
+          ],
+          testDuration: ["Test duration", "The slowest of this test's runs."],
+          history: [
+            "History",
+            "This test on this platform in the latest saved runs, oldest on the left; the outlined square is this run. Mixed colors mean an unstable (flaky) test.",
+          ],
+          hooks: [
+            "Set up and tear down",
+            "Hooks Jest ran around this test: beforeAll, beforeEach, afterEach, afterAll. If one fails, the test is broken even when its own assertions are fine.",
+          ],
+          command: [
+            "Run locally",
+            "Runs only this test, on iOS and Android, from the project root. Paste it into a terminal.",
+          ],
+          statements: [
+            "Statement coverage",
+            "Share of statements that tests ran at least once. Close to lines, but a line with two statements counts twice.",
+          ],
+          lines: [
+            "Line coverage",
+            "Share of executable lines that tests ran at least once.",
+          ],
+          branches: [
+            "Branch coverage",
+            "Share of if/else, ?:, &&, || and ?? paths that tests took. The strictest metric: a line can run while one of its branches never does.",
+          ],
+          functions: [
+            "Function coverage",
+            "Share of functions that tests called at least once.",
+          ],
+          files: ["Files", "Source files that Jest measured for coverage."],
+          uncovered: [
+            "Uncovered lines",
+            "Executable lines no test ever ran. This is where tests are missing.",
+          ],
+          uncoveredModule: [
+            "Uncovered by module",
+            "How much is not covered in each module, largest gap first. The longest bar is where tests help most.",
+          ],
+          level: [
+            "Coverage level",
+            `Color by line coverage: bad below ${thresholds.bad}%, close ${thresholds.bad}–${thresholds.warn}%, ok from ${thresholds.warn}%. The testing standard asks for ${thresholds.warn}% of changed lines.`,
+          ],
+          bad: [
+            `Below ${thresholds.bad}%`,
+            "Files with low line coverage: start here.",
+          ],
+          warn: [
+            `${thresholds.bad}–${thresholds.warn}%`,
+            "Close to the threshold of the testing standard.",
+          ],
+          ok: [
+            `${thresholds.warn}% and above`,
+            "Meets the threshold of the testing standard.",
+          ],
+          view: [
+            "View",
+            "Files: every file. Folders: totals per folder; click a folder to see its files.",
+          ],
+          allureReport: [
+            "Full Allure report",
+            "The report from the testing standard: run history, charts, flaky tests, hooks and attachments. Opens in a new tab.",
+          ],
+          coverageReport: [
+            "Detailed coverage report",
+            "The HTML report Jest builds in a coverage run: a folder tree and every file's code with highlighting. Opens in a new tab.",
+          ],
+          fileMode: [
+            "Page opened as a file",
+            "Allure can't load its data from disk. Run npm run test:dashboard: the page opens through a local server and the link works.",
+          ],
+          notRun: ["Not run", "No test executed this line."],
+          partial: [
+            "Branch not taken",
+            "The line ran, but one of its branches (if/else, ?:, &&, ??) never did.",
+          ],
+        },
+      };
+      const helpAttr = (key) => (HELP[lang][key] ? ` data-help="${key}"` : "");
+
+      // ---------- Shared helpers ----------
+      const STATUSES = ["failed", "broken", "skipped", "passed"];
+      const STATUS_RANK = {
+        failed: 0,
+        broken: 1,
+        skipped: 2,
+        unknown: 2,
+        passed: 3,
+      };
+      const KIND_ORDER = [
+        "unit",
+        "component",
+        "integration",
+        "security",
+        "other",
+      ];
+      const STACK_ORDER = ["passed", "skipped", "broken", "failed"];
+      const STATUS_COLORS = {
+        passed: "var(--status-good)",
+        skipped: "var(--status-neutral)",
+        broken: "var(--status-warning)",
+        failed: "var(--status-critical)",
+      };
+      const MAX_LISTED_LINES = 12;
+
+      const escapeHtml = (text) =>
+        String(text).replace(
+          /[&<>"']/g,
+          (char) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[char],
+        );
+      const formatDate = (time) =>
+        time
+          ? new Date(time).toLocaleString(lang === "ru" ? "ru-RU" : "en-GB")
+          : "—";
+      const formatDuration = (ms) =>
+        ms >= 1000
+          ? `${(ms / 1000).toFixed(1)} ${lang === "ru" ? "с" : "s"}`
+          : `${ms} ${lang === "ru" ? "мс" : "ms"}`;
+      const percent = (hit, found) => (found ? (hit / found) * 100 : 100);
+      const level = (value) =>
+        value < thresholds.bad
+          ? "bad"
+          : value < thresholds.warn
+            ? "warn"
+            : "ok";
+      const splitPath = (path) => {
+        const index = path.lastIndexOf("/");
+        return `<span class="dir">${escapeHtml(path.slice(0, index + 1))}</span>${escapeHtml(path.slice(index + 1))}`;
+      };
+      const countBy = (items, key) =>
+        items.reduce(
+          (counts, item) => (
+            (counts[item[key]] = (counts[item[key]] ?? 0) + 1),
+            counts
+          ),
+          {},
+        );
+      const normalizeStatus = (status) =>
+        STATUSES.includes(status) ? status : "skipped";
+      const worstStatus = (runs) =>
+        runs.reduce(
+          (worst, run) =>
+            STATUS_RANK[run.status] < STATUS_RANK[worst] ? run.status : worst,
+          "passed",
+        );
+      const statusName = (status) => t().status[status] ?? status;
+      const kindName = (kind) => t().kind[kind] ?? kind;
+      const findByData = (root, selector, key, value) =>
+        [...root.querySelectorAll(selector)].find(
+          (element) => element.dataset[key] === value,
+        );
+
+      // Re-renders without moving the clicked element on screen.
+      const keepInPlace = (element, rerender, findAgain) => {
+        const top = element?.getBoundingClientRect().top;
+        rerender();
+        const next = findAgain();
+        if (next && top !== undefined)
+          window.scrollBy?.(0, next.getBoundingClientRect().top - top);
+      };
+
+      // One tooltip for the page: data-help names an explanation, data-tip adds the concrete figure.
+      const tooltip = document.getElementById("tooltip");
+      document.addEventListener("mousemove", (event) => {
+        const target = event.target.closest?.("[data-tip], [data-help]");
+        if (!target) {
+          tooltip.style.display = "none";
+          return;
+        }
+        const help = HELP[lang][target.dataset.help];
+        tooltip.innerHTML = [
+          help ? `<div class="tip-title">${escapeHtml(help[0])}</div>` : "",
+          target.dataset.tip
+            ? `<div class="${help ? "tip-context" : ""}">${escapeHtml(target.dataset.tip)}</div>`
+            : "",
+          help ? `<div class="tip-text">${escapeHtml(help[1])}</div>` : "",
+        ].join("");
+        tooltip.style.display = "block";
+        const x = Math.min(
+          event.clientX + 12,
+          window.innerWidth - tooltip.offsetWidth - 8,
+        );
+        const below = event.clientY + 14;
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${below + tooltip.offsetHeight > window.innerHeight ? event.clientY - tooltip.offsetHeight - 10 : below}px`;
+      });
+
+      // Copy buttons live inside re-rendered markup, so one listener handles them all.
+      document.addEventListener("click", (event) => {
+        const button = event.target.closest?.("[data-copy]");
+        if (!button) return;
+        event.stopPropagation();
+        const done = (text) => {
+          button.textContent = text;
+          setTimeout(() => (button.textContent = t().copy), 1500);
+        };
+        navigator.clipboard
+          ? navigator.clipboard.writeText(button.dataset.copy).then(
+              () => done(t().copied),
+              () => done(t().copyManually),
+            )
+          : done(t().copyManually);
+      });
+
+      // Buttons to the full reports. Allure needs a server, so from a file:// page its hint says how to get one.
+      const reportLink = (href, label, help) =>
+        href
+          ? `<a class="report-link" href="${escapeHtml(href)}" target="_blank" rel="noopener" data-help="${help === "allureReport" && location.protocol === "file:" ? "fileMode" : help}">${label}</a>`
+          : "";
+      const chipGroup = (
+        group,
+        options,
+        selected,
+        counts,
+        label = (option) => option,
+      ) =>
+        `<div class="filter-row"><span class="filter-name"${helpAttr(group.toLowerCase())}>${t().filter[group]}</span>${options
+          .map(
+            (option) =>
+              `<button class="chip ${selected.has(option) ? "on" : ""}" data-group="${group}" data-value="${escapeHtml(option)}"${helpAttr(option)}>${escapeHtml(label(option))}<span class="count">${counts?.[option] ?? 0}</span></button>`,
+          )
+          .join(
+            "",
+          )}${selected.size ? `<button class="link-button" data-clear="${group}">${t().clear}</button>` : ""}</div>`;
+
+      function bindChips(root, filters, rerender) {
+        root.querySelectorAll(".chip[data-group]").forEach((chip) =>
+          chip.addEventListener("click", () => {
+            const set = filters[chip.dataset.group];
+            set.has(chip.dataset.value)
+              ? set.delete(chip.dataset.value)
+              : set.add(chip.dataset.value);
+            rerender();
+          }),
+        );
+        root.querySelectorAll("[data-clear]").forEach((button) =>
+          button.addEventListener("click", () => {
+            filters[button.dataset.clear].clear();
+            rerender();
+          }),
+        );
+      }
+
+      const bindSearch = (id, apply, rerender) => {
+        const input = document.getElementById(id);
+        input.addEventListener("input", () => {
+          apply(input.value.trim().toLowerCase());
+          const position = input.selectionStart;
+          rerender();
+          const next = document.getElementById(id);
+          next.focus();
+          next.setSelectionRange(position, position);
+        });
+      };
+
+      // ---------- Header and tabs ----------
+      const sections = {
+        tests: document.getElementById("tests-section"),
+        coverage: document.getElementById("coverage-section"),
+      };
+      let activeTab = location.hash === "#coverage" ? "coverage" : "tests";
+      const pageTitle = `${DATA.projectName} Tests`;
+      document.title = pageTitle;
+      document.getElementById("title").textContent = pageTitle;
+      const renderHeader = () => {
+        document.documentElement.lang = lang;
+        document.getElementById("meta").textContent = t().meta(
+          formatDate(DATA.runAt),
+          formatDate(DATA.coverageAt),
+          formatDate(DATA.generatedAt),
+        );
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.textContent =
+            tab.dataset.tab === "tests" ? t().tabTests : t().tabCoverage;
+          tab.classList.toggle("active", tab.dataset.tab === activeTab);
+        });
+        document
+          .querySelectorAll("#lang-switch button")
+          .forEach((button) =>
+            button.classList.toggle("on", button.dataset.lang === lang),
+          );
+        Object.entries(sections).forEach(([key, section]) =>
+          section.classList.toggle("hidden", key !== activeTab),
+        );
+      };
+      document.querySelectorAll(".tab").forEach((tab) =>
+        tab.addEventListener("click", () => {
+          activeTab = tab.dataset.tab;
+          history.replaceState(null, "", `#${activeTab}`);
+          renderHeader();
+        }),
+      );
+      document.querySelectorAll("#lang-switch button").forEach((button) =>
+        button.addEventListener("click", () => {
+          lang = button.dataset.lang;
+          try {
+            localStorage.setItem(LANG_STORAGE_KEY, lang);
+          } catch {
+            // The choice still applies to this page view.
+          }
+          renderAll();
+        }),
+      );
+
+      // ---------- Tests ----------
+      for (const test of DATA.tests) {
+        for (const run of test.runs) run.status = normalizeStatus(run.status);
+        test.runs.sort((a, b) => a.platform.localeCompare(b.platform));
+        test.search =
+          `${test.file} ${test.suite} ${test.name} ${test.runs.map((run) => run.message).join(" ")}`.toLowerCase();
+      }
+      const testState = {
+        search: "",
+        filters: {
+          Status: new Set(),
+          Kind: new Set(),
+          Platform: new Set(),
+          Module: new Set(),
+        },
+        sort: "status",
+        openFiles: new Set(),
+        openTests: new Set(),
+      };
+      const allPlatforms = [
+        ...new Set(
+          DATA.tests.flatMap((test) => test.runs.map((run) => run.platform)),
+        ),
+      ].sort();
+      const allKinds = KIND_ORDER.filter((kind) =>
+        DATA.tests.some((test) => test.kind === kind),
+      );
+      const allTestModules = [
+        ...new Set(DATA.tests.map((test) => test.module)),
+      ].sort();
+
+      // A run is shown when it matches every filter; a test is shown when one of its runs is.
+      const matchingRuns = (test, ignore) => {
+        const { filters, search } = testState;
+        if (search && !test.search.includes(search)) return [];
+        if (
+          ignore !== "Kind" &&
+          filters.Kind.size &&
+          !filters.Kind.has(test.kind)
+        )
+          return [];
+        if (
+          ignore !== "Module" &&
+          filters.Module.size &&
+          !filters.Module.has(test.module)
+        )
+          return [];
+        return test.runs.filter(
+          (run) =>
+            (ignore === "Platform" ||
+              !filters.Platform.size ||
+              filters.Platform.has(run.platform)) &&
+            (ignore === "Status" ||
+              !filters.Status.size ||
+              filters.Status.has(run.status)),
+        );
+      };
+      // Counts on a chip show what that chip would add, given the other filters.
+      const facetCounts = (group, key) => {
+        const counts = {};
+        for (const test of DATA.tests) {
+          const runs = matchingRuns(test, group);
+          if (!runs.length) continue;
+          if (key === "status" || key === "platform")
+            for (const run of runs)
+              counts[run[key]] = (counts[run[key]] ?? 0) + 1;
+          else counts[test[key]] = (counts[test[key]] ?? 0) + runs.length;
+        }
+        return counts;
+      };
+      const sorters = {
+        status: (a, b) =>
+          STATUS_RANK[a.status] - STATUS_RANK[b.status] ||
+          a.file.localeCompare(b.file),
+        name: (a, b) => a.file.localeCompare(b.file),
+        duration: (a, b) => b.duration - a.duration,
+      };
+      const statusLegend = () =>
+        `<div class="legend-items">${STACK_ORDER.map((status) => `<span${helpAttr(status)}><i class="swatch" style="background:${STATUS_COLORS[status]}"></i>${statusName(status)}</span>`).join("")}</div>`;
+
+      // Results by kind: one stacked bar per kind; the kind filter is ignored so every kind stays visible.
+      function renderKindChart() {
+        const rows = [{ kind: null }, ...allKinds.map((kind) => ({ kind }))];
+        for (const row of rows) {
+          row.label = kindName(row.kind ?? "all");
+          row.counts = { passed: 0, skipped: 0, broken: 0, failed: 0 };
+          row.total = 0;
+          for (const test of DATA.tests) {
+            if (row.kind && test.kind !== row.kind) continue;
+            for (const run of matchingRuns(test, "Kind")) {
+              row.counts[run.status] += 1;
+              row.total += 1;
+            }
+          }
+        }
+        const selected = testState.filters.Kind;
+        return `
+          <div class="chart-card">
+            <div class="chart-head">
+              <span class="chart-title">${t().resultsByKind}<span class="muted">${t().clickToFilter}</span></span>
+              ${statusLegend()}
+            </div>
+            ${rows
+              .map((row) => {
+                const failing = row.counts.failed + row.counts.broken;
+                const passRate = row.total
+                  ? (row.counts.passed / row.total) * 100
+                  : 0;
+                const segments = STACK_ORDER.filter(
+                  (status) => row.counts[status],
+                )
+                  .map(
+                    (status) =>
+                      `<span style="flex:${row.counts[status]};background:${STATUS_COLORS[status]}" data-tip="${escapeHtml(t().kindTip(row.label, statusName(status), row.counts[status], row.total, ((row.counts[status] / row.total) * 100).toFixed(1)))}"></span>`,
+                  )
+                  .join("");
+                const on = row.kind
+                  ? selected.has(row.kind)
+                  : selected.size === 0;
+                return `
+                  <button class="chart-row ${row.kind ? "" : "total"} ${on ? "on" : ""}" data-kind="${row.kind ?? ""}">
+                    <span class="name"${helpAttr(row.kind ?? "all")}>${row.label}</span>
+                    <span class="stack">${segments}</span>
+                    <span class="figure"${helpAttr("passRate")}><b>${passRate.toFixed(1)}%</b> ${t().passedShare} · ${failing ? `<b>${t().failing(failing)}</b>` : t().noFailures} · ${t().runsCount(row.total)}</span>
+                  </button>`;
+              })
+              .join("")}
+          </div>`;
+      }
+
+      function renderTests() {
+        const visible = [];
+        for (const test of DATA.tests) {
+          const runs = matchingRuns(test);
+          if (runs.length)
+            visible.push({ test, runs, status: worstStatus(runs) });
+        }
+        const runs = visible.flatMap((item) => item.runs);
+        const statusCounts = countBy(runs, "status");
+        const byFile = new Map();
+        for (const item of visible) {
+          const group = byFile.get(item.test.file) ?? {
+            file: item.test.file,
+            kind: item.test.kind,
+            items: [],
+          };
+          group.items.push(item);
+          byFile.set(item.test.file, group);
+        }
+        const groups = [...byFile.values()].map((group) => {
+          const groupRuns = group.items.flatMap((item) => item.runs);
+          return {
+            ...group,
+            status: worstStatus(groupRuns),
+            duration: groupRuns.reduce((total, run) => total + run.duration, 0),
+            counts: countBy(groupRuns, "status"),
+          };
+        });
+        groups.sort(sorters[testState.sort]);
+        const { filters } = testState;
+        const autoOpen =
+          testState.search ||
+          (filters.Status.size && !filters.Status.has("passed"));
+        const valueClass = {
+          passed: "ok",
+          skipped: "muted",
+          broken: "warn",
+          failed: "bad",
+        };
+
+        sections.tests.innerHTML = `
+          <div class="section-actions">${reportLink(DATA.reports?.allure, t().openAllure, "allureReport")}</div>
+          <div class="cards">
+            <div class="card"><div class="label"${helpAttr("runs")}>${t().runs}</div><div class="value">${runs.length}</div><div class="sub">${t().testsAndFiles(visible.length, groups.length)}</div></div>
+            ${STATUSES.map((status) => `<div class="card"><div class="label"${helpAttr(status)}>${statusName(status)}</div><div class="value ${valueClass[status]}">${statusCounts[status] ?? 0}</div></div>`).join("")}
+          </div>
+          ${renderKindChart()}
+          <div class="toolbar">
+            <input class="search" id="test-search" placeholder="${escapeHtml(t().searchTests)}" value="${escapeHtml(testState.search)}" />
+            ${chipGroup("Status", STATUSES, filters.Status, facetCounts("Status", "status"), statusName)}
+            ${chipGroup("Kind", allKinds, filters.Kind, facetCounts("Kind", "kind"), kindName)}
+            ${chipGroup("Platform", allPlatforms, filters.Platform, facetCounts("Platform", "platform"))}
+            ${chipGroup("Module", allTestModules, filters.Module, facetCounts("Module", "module"))}
+            <div class="filter-row"><span class="filter-name">${t().filter.Sort}</span>
+              <select id="test-sort">
+                ${[
+                  ["status", t().sortStatus],
+                  ["name", t().sortName],
+                  ["duration", t().sortDuration],
+                ]
+                  .map(
+                    ([value, label]) =>
+                      `<option value="${value}" ${testState.sort === value ? "selected" : ""}>${label}</option>`,
+                  )
+                  .join("")}
+              </select>
+              <button class="link-button" id="expand-all">${t().expandAll}</button>
+              <button class="link-button" id="collapse-all">${t().collapseAll}</button>
+            </div>
+          </div>
+          <div class="list">${groups.length ? groups.map((group) => renderFileGroup(group, autoOpen)).join("") : `<div class="empty">${t().noTests}</div>`}</div>`;
+        bindTestEvents(groups);
+      }
+
+      function renderFileGroup(group, autoOpen) {
+        const open =
+          testState.openFiles.has(group.file) ||
+          (autoOpen && !testState.openFiles.has(`!${group.file}`));
+        const items = [...group.items].sort(
+          (a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status],
+        );
+        return `
+          <div class="file-row" data-file="${escapeHtml(group.file)}">
+            <span class="caret">${open ? "▾" : "▸"}</span>
+            <span class="dot ${group.status}"></span>
+            <span class="file-path">${splitPath(group.file)}</span>
+            <span class="kind"${helpAttr(group.kind)}>${kindName(group.kind)}</span>
+            <span class="badges">${STATUSES.filter(
+              (status) => group.counts[status],
+            )
+              .map(
+                (status) =>
+                  `<span class="badge ${status}"${helpAttr(status)} data-tip="${escapeHtml(t().runsInFile(group.counts[status], statusName(status)))}">${group.counts[status]}</span>`,
+              )
+              .join("")}</span>
+            <span class="duration hide-mobile"${helpAttr("fileDuration")}>${formatDuration(group.duration)}</span>
+          </div>
+          ${open ? items.map(renderTest).join("") : ""}`;
+      }
+
+      // A command that runs just this test locally on both platforms.
+      const shellQuote = (text) => `'${text.replace(/'/g, "'\\''")}'`;
+      const regexEscape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const runCommand = (test) =>
+        `JEST_ALL_PLATFORMS=true npx jest ${shellQuote(test.file)} -t ${shellQuote(regexEscape([...test.suite.split(" › ").filter(Boolean), test.name].join(" ")))}`;
+
+      // Consecutive hooks with the same name and result collapse into one chip: beforeEach ×3.
+      const renderHooks = (hooks) => {
+        if (!hooks.length) return "";
+        const groups = [];
+        for (const hook of hooks) {
+          const last = groups.at(-1);
+          if (
+            last &&
+            last.name === hook.name &&
+            last.status === hook.status &&
+            last.phase === hook.phase
+          ) {
+            last.count += 1;
+            last.duration += hook.duration;
+          } else groups.push({ ...hook, count: 1 });
+        }
+        const failing = hooks.filter(
+          (hook) => hook.status !== "passed" && hook.message,
+        );
+        const title = (hook) =>
+          `${hook.name}${hook.count > 1 ? ` ×${hook.count}` : ""}`;
+        return `
+          <div class="hooks">
+            <span data-help="hooks">${t().hooks}</span>
+            ${groups
+              .map(
+                (hook) =>
+                  `<span class="hook ${hook.status}" data-tip="${escapeHtml(`${hook.phase === "setup" ? t().setup : t().teardown} · ${title(hook)} · ${statusName(hook.status)} · ${formatDuration(hook.duration)}`)}">${title(hook)}</span>`,
+              )
+              .join("")}
+          </div>
+          ${failing.map((hook) => `<h4>${hook.name} · ${statusName(hook.status)}</h4><pre>${escapeHtml(hook.message)}</pre>`).join("")}`;
+      };
+
+      const renderHistory = (items) =>
+        items.length > 1
+          ? `<span class="history" data-help="history">${items
+              .map(
+                (item, index) =>
+                  `<i class="${index === items.length - 1 ? "current" : ""}" style="background:${STATUS_COLORS[normalizeStatus(item.status)]}" data-tip="${escapeHtml(t().historyTip(formatDate(item.at), statusName(normalizeStatus(item.status))))}"></i>`,
+              )
+              .join("")}</span>`
+          : "";
+
+      const renderRunDetails = (run) => `
+        <div class="run-block">
+          <div class="run-head">
+            <span class="platform badge ${run.status}"${helpAttr(run.platform)}>${run.platform}</span>
+            <b>${statusName(run.status)}</b>
+            <span class="muted">${formatDuration(run.duration)} · ${t().started} ${formatDate(run.start)}</span>
+            ${renderHistory(run.history ?? [])}
+          </div>
+          ${run.message ? `<div><h4>${t().error}</h4><pre>${escapeHtml(run.message)}</pre></div>` : ""}
+          ${run.trace ? `<details><summary class="muted">${t().stack}</summary><pre>${escapeHtml(run.trace)}</pre></details>` : ""}
+          ${renderHooks(run.hooks ?? [])}
+        </div>`;
+
+      function renderTest({ test, runs, status }) {
+        const open = testState.openTests.has(test.id);
+        const command = runCommand(test);
+        return `
+          <div class="test-row">
+            <div class="test-head" data-test="${escapeHtml(test.id)}">
+              <span class="dot ${status}"></span>
+              <span class="test-name">${test.suite ? `<span class="suite">${escapeHtml(test.suite)} › </span>` : ""}${escapeHtml(test.name)}</span>
+              ${runs.map((run) => `<span class="platform badge ${run.status}"${helpAttr(run.platform)} data-tip="${escapeHtml(t().runTip(run.platform, statusName(run.status), formatDuration(run.duration)))}">${run.platform}</span>`).join("")}
+              <span class="duration"${helpAttr("testDuration")}>${formatDuration(Math.max(...runs.map((run) => run.duration)))}</span>
+            </div>
+            ${
+              open
+                ? `<div class="details">
+                    <dl class="info-grid">
+                      <dt>${t().file}</dt><dd>${escapeHtml(test.file)}</dd>
+                      ${test.suite ? `<dt>${t().describe}</dt><dd>${escapeHtml(test.suite)}</dd>` : ""}
+                      <dt>${t().kindLabel}</dt><dd><span${helpAttr(test.kind)}>${kindName(test.kind)}</span></dd>
+                      <dt>${t().module}</dt><dd>${escapeHtml(test.module)}</dd>
+                    </dl>
+                    <div><h4 data-help="command">${t().runLocally}</h4><div class="command"><code>${escapeHtml(command)}</code><button class="copy" data-copy="${escapeHtml(command)}">${t().copy}</button></div></div>
+                    ${runs.map(renderRunDetails).join("")}
+                  </div>`
+                : ""
+            }
+          </div>`;
+      }
+
+      function bindTestEvents(groups) {
+        bindSearch(
+          "test-search",
+          (value) => (testState.search = value),
+          renderTests,
+        );
+        document
+          .getElementById("test-sort")
+          .addEventListener("change", (event) => {
+            testState.sort = event.target.value;
+            renderTests();
+          });
+        document.getElementById("expand-all").addEventListener("click", () => {
+          groups.forEach((group) => {
+            testState.openFiles.delete(`!${group.file}`);
+            testState.openFiles.add(group.file);
+          });
+          renderTests();
+        });
+        document
+          .getElementById("collapse-all")
+          .addEventListener("click", () => {
+            testState.openFiles.clear();
+            groups.forEach((group) =>
+              testState.openFiles.add(`!${group.file}`),
+            );
+            renderTests();
+          });
+        bindChips(sections.tests, testState.filters, renderTests);
+        sections.tests
+          .querySelectorAll(".chart-row[data-kind]")
+          .forEach((row) =>
+            row.addEventListener("click", () => {
+              const { kind } = row.dataset;
+              const kinds = testState.filters.Kind;
+              if (!kind) kinds.clear();
+              else if (kinds.has(kind)) kinds.delete(kind);
+              else kinds.add(kind);
+              keepInPlace(row, renderTests, () =>
+                findByData(sections.tests, ".chart-row", "kind", kind),
+              );
+            }),
+          );
+        sections.tests.querySelectorAll(".file-row").forEach((row) =>
+          row.addEventListener("click", () => {
+            const { file } = row.dataset;
+            const isOpen = row.querySelector(".caret").textContent === "▾";
+            testState.openFiles.delete(isOpen ? file : `!${file}`);
+            testState.openFiles.add(isOpen ? `!${file}` : file);
+            keepInPlace(row, renderTests, () =>
+              findByData(sections.tests, ".file-row", "file", file),
+            );
+          }),
+        );
+        sections.tests.querySelectorAll(".test-head").forEach((row) =>
+          row.addEventListener("click", () => {
+            const { test } = row.dataset;
+            testState.openTests.has(test)
+              ? testState.openTests.delete(test)
+              : testState.openTests.add(test);
+            keepInPlace(row, renderTests, () =>
+              findByData(sections.tests, ".test-head", "test", test),
+            );
+          }),
+        );
+      }
+
+      // ---------- Coverage ----------
+      // Statements come from coverage-summary.json; an older run without it hides the column.
+      const hasStatements =
+        DATA.coverage.length > 0 &&
+        DATA.coverage.every((file) => file.statementsFound !== null);
+      const METRICS = [
+        ...(hasStatements
+          ? [
+              {
+                key: "statements",
+                found: "statementsFound",
+                hit: "statementsHit",
+                pct: "statementPct",
+              },
+            ]
+          : []),
+        {
+          key: "branches",
+          found: "branchesFound",
+          hit: "branchesHit",
+          pct: "branchPct",
+        },
+        {
+          key: "functions",
+          found: "functionsFound",
+          hit: "functionsHit",
+          pct: "functionPct",
+        },
+        { key: "lines", found: "linesFound", hit: "linesHit", pct: "linePct" },
+      ];
+      const LEVELS = ["bad", "warn", "ok"];
+      const coverageState = {
+        search: "",
+        filters: { Module: new Set(), Level: new Set() },
+        view: "files",
+        sortKey: "lines",
+        sortAsc: true,
+        selected: null,
+        chartMetric: "lines",
+      };
+      const allCoverageModules = [
+        ...new Set(DATA.coverage.map((file) => file.module)),
+      ].sort();
+
+      for (const file of DATA.coverage) {
+        for (const metric of METRICS)
+          file[metric.pct] = percent(
+            file[metric.hit] ?? 0,
+            file[metric.found] ?? 0,
+          );
+        file.uncovered = file.linesFound - file.linesHit;
+        file.uncoveredLines = Object.entries(file.lines)
+          .filter(([, hits]) => hits === 0)
+          .map(([line]) => Number(line));
+        file.level = level(file.linePct);
+      }
+
+      const aggregate = (files, path) => {
+        const totals = { path, files: files.length };
+        for (const metric of METRICS) {
+          totals[metric.found] = files.reduce(
+            (total, file) => total + (file[metric.found] ?? 0),
+            0,
+          );
+          totals[metric.hit] = files.reduce(
+            (total, file) => total + (file[metric.hit] ?? 0),
+            0,
+          );
+          totals[metric.pct] = percent(
+            totals[metric.hit],
+            totals[metric.found],
+          );
+        }
+        totals.uncovered = totals.linesFound - totals.linesHit;
+        return totals;
+      };
+
+      // A coverage cell: percent and bar, with the counts behind them in the tooltip.
+      const pctCell = (row, metric, extraClass = "") => {
+        const value = row[metric.pct];
+        const found = row[metric.found];
+        const hit = row[metric.hit];
+        const tip = found
+          ? t().cellTip(hit, found, t().unit[metric.key])
+          : t().nothingToCover;
+        return `<td class="num ${extraClass}" data-help="${metric.key}" data-tip="${escapeHtml(tip)}"><span class="pct"><span class="${level(value)}">${value.toFixed(1)}%</span><span class="bar"><span class="${level(value)}" style="width:${value}%"></span></span></span></td>`;
+      };
+      const formatLineList = (lines) =>
+        lines.length > MAX_LISTED_LINES
+          ? `${lines.slice(0, MAX_LISTED_LINES).join(", ")} ${t().andMore(lines.length - MAX_LISTED_LINES)}`
+          : lines.join(", ");
+
+      // Where tests are missing: uncovered amount per module, largest gap first.
+      // The module filter is ignored so every module stays visible; selected ones are highlighted.
+      function renderModuleChart() {
+        const metric =
+          METRICS.find((item) => item.key === coverageState.chartMetric) ??
+          METRICS.at(-1);
+        const unit = t().unit[metric.key];
+        const { search } = coverageState;
+        const byModule = new Map();
+        for (const file of DATA.coverage) {
+          if (search && !file.path.toLowerCase().includes(search)) continue;
+          const row = byModule.get(file.module) ?? {
+            module: file.module,
+            found: 0,
+            hit: 0,
+          };
+          row.found += file[metric.found] ?? 0;
+          row.hit += file[metric.hit] ?? 0;
+          byModule.set(file.module, row);
+        }
+        const rows = [...byModule.values()].map((row) => ({
+          ...row,
+          missing: row.found - row.hit,
+          pct: percent(row.hit, row.found),
+        }));
+        const gaps = rows
+          .filter((row) => row.missing > 0)
+          .sort((a, b) => b.missing - a.missing || a.pct - b.pct);
+        const complete = rows
+          .filter((row) => row.missing === 0)
+          .map((row) => row.module)
+          .sort();
+        const max = Math.max(1, ...gaps.map((row) => row.missing));
+        const selected = coverageState.filters.Module;
+        return `
+          <div class="chart-card">
+            <div class="chart-head">
+              <span class="chart-title"${helpAttr("uncoveredModule")}>${t().uncoveredBy(unit)}<span class="muted">${t().largestFirst}</span></span>
+              <span class="filter-row">${METRICS.map((item) => `<button class="chip ${metric.key === item.key ? "on" : ""}" data-metric="${item.key}"${helpAttr(item.key)}>${t()[item.key]}</button>`).join("")}</span>
+            </div>
+            ${
+              gaps.length
+                ? gaps
+                    .map(
+                      (row) => `
+                <button class="chart-row ${selected.has(row.module) ? "on" : ""}" data-module="${escapeHtml(row.module)}">
+                  <span class="name"${helpAttr("module")}>${escapeHtml(row.module)}</span>
+                  <span class="track"><span style="width:${(row.missing / max) * 100}%" data-tip="${escapeHtml(t().moduleTip(row.module, row.missing, row.found, unit, row.pct.toFixed(1)))}"></span></span>
+                  <span class="figure"${helpAttr("uncovered")}><b>${row.missing}</b> ${t().uncoveredShort} · <span class="${level(row.pct)}">${row.pct.toFixed(1)}%</span> ${t().coveredShort}</span>
+                </button>`,
+                    )
+                    .join("")
+                : `<div class="empty">${t().everythingCovered}</div>`
+            }
+            ${complete.length ? `<div class="chart-foot">${t().fullyCovered(complete.length)} ${complete.map(escapeHtml).join(", ")}</div>` : ""}
+          </div>`;
+      }
+
+      function renderCoverage() {
+        if (!DATA.coverage.length) {
+          sections.coverage.innerHTML = `<div class="empty">${t().noCoverage}</div>`;
+          return;
+        }
+        const { filters, search } = coverageState;
+        const bySearch = DATA.coverage.filter(
+          (file) => !search || file.path.toLowerCase().includes(search),
+        );
+        const base = bySearch.filter(
+          (file) => !filters.Module.size || filters.Module.has(file.module),
+        );
+        const files = base.filter(
+          (file) => !filters.Level.size || filters.Level.has(file.level),
+        );
+        const totals = aggregate(files, "");
+
+        let rows = files;
+        if (coverageState.view === "folders") {
+          const byFolder = new Map();
+          for (const file of files) {
+            const folder = file.path.slice(0, file.path.lastIndexOf("/"));
+            byFolder.set(folder, [...(byFolder.get(folder) ?? []), file]);
+          }
+          rows = [...byFolder.entries()].map(([folder, folderFiles]) =>
+            aggregate(folderFiles, folder),
+          );
+        }
+        const sortMetric = METRICS.find(
+          (metric) => metric.key === coverageState.sortKey,
+        );
+        const sortField = sortMetric ? sortMetric.pct : coverageState.sortKey;
+        rows = [...rows].sort((a, b) => {
+          const order =
+            sortField === "path"
+              ? a.path.localeCompare(b.path)
+              : a[sortField] - b[sortField] || a.path.localeCompare(b.path);
+          return coverageState.sortAsc ? order : -order;
+        });
+        const arrow = (name) =>
+          coverageState.sortKey === name
+            ? coverageState.sortAsc
+              ? " ▲"
+              : " ▼"
+            : "";
+        const columns = METRICS.length + 2;
+        const isFiles = coverageState.view === "files";
+
+        sections.coverage.innerHTML = `
+          <div class="section-actions">${reportLink(DATA.reports?.coverage, t().openCoverage, "coverageReport")}</div>
+          <div class="cards">
+            ${METRICS.map(
+              (metric) =>
+                `<div class="card"><div class="label"${helpAttr(metric.key)}>${t()[metric.key]}</div><div class="value ${level(totals[metric.pct])}">${totals[metric.pct].toFixed(2)}%</div><div class="sub">${totals[metric.hit]} / ${totals[metric.found]}</div></div>`,
+            ).join("")}
+            <div class="card"><div class="label"${helpAttr("files")}>${t().files}</div><div class="value">${files.length}</div><div class="sub">${t().uncoveredLinesCount(totals.uncovered)}</div></div>
+          </div>
+          ${renderModuleChart()}
+          <div class="toolbar">
+            <input class="search" id="coverage-search" placeholder="${escapeHtml(t().searchFiles)}" value="${escapeHtml(coverageState.search)}" />
+            ${chipGroup("Module", allCoverageModules, filters.Module, countBy(bySearch, "module"))}
+            ${chipGroup("Level", LEVELS, filters.Level, countBy(base, "level"), (value) => t().level[value])}
+            <div class="filter-row"><span class="filter-name"${helpAttr("view")}>${t().filter.View}</span>
+              <button class="chip ${isFiles ? "on" : ""}" data-view="files">${t().viewFiles}</button>
+              <button class="chip ${isFiles ? "" : "on"}" data-view="folders">${t().viewFolders}</button>
+              <span class="muted" style="font-size: 12px; margin-left: 8px" data-help="level">${t().levelByLines}: ${LEVELS.map((name) => `${t().level[name]} ${HELP[lang][name][0]}`).join(" · ")}</span>
+            </div>
+          </div>
+          <div class="list">
+            <table>
+              <thead><tr>
+                <th data-sort="path">${isFiles ? t().file : t().folder}${arrow("path")}</th>
+                ${METRICS.map((metric) => `<th class="num ${metric.key === "lines" ? "" : "hide-mobile"}" data-sort="${metric.key}"${helpAttr(metric.key)}>${t()[metric.key]}${arrow(metric.key)}</th>`).join("")}
+                <th class="num" data-sort="uncovered"${helpAttr("uncovered")}>${t().uncoveredLines}${arrow("uncovered")}</th>
+              </tr></thead>
+              <tbody>${
+                rows.length
+                  ? rows
+                      .map(
+                        (row) => `
+                <tr data-path="${escapeHtml(row.path)}" class="${coverageState.selected === row.path ? "selected" : ""}">
+                  <td class="file-path">${isFiles ? splitPath(row.path) : `${escapeHtml(row.path)}/ <span class="muted">(${row.files})</span>`}</td>
+                  ${METRICS.map((metric) => pctCell(row, metric, metric.key === "lines" ? "" : "hide-mobile")).join("")}
+                  <td class="num" data-help="uncovered" data-tip="${escapeHtml(row.uncoveredLines?.length ? t().linesList(formatLineList(row.uncoveredLines)) : t().uncoveredLinesCount(row.uncovered))}">${row.uncovered}</td>
+                </tr>${isFiles && coverageState.selected === row.path ? `<tr class="viewer-row"><td colspan="${columns}"><div id="viewer"></div></td></tr>` : ""}`,
+                      )
+                      .join("")
+                  : `<tr><td colspan="${columns}" class="empty">${t().noFiles}</td></tr>`
+              }</tbody>
+            </table>
+          </div>`;
+        bindCoverageEvents();
+        renderViewer();
+      }
+
+      function bindCoverageEvents() {
+        bindSearch(
+          "coverage-search",
+          (value) => (coverageState.search = value),
+          renderCoverage,
+        );
+        bindChips(sections.coverage, coverageState.filters, renderCoverage);
+        sections.coverage.querySelectorAll("[data-metric]").forEach((button) =>
+          button.addEventListener("click", () => {
+            coverageState.chartMetric = button.dataset.metric;
+            renderCoverage();
+          }),
+        );
+        sections.coverage
+          .querySelectorAll(".chart-row[data-module]")
+          .forEach((row) =>
+            row.addEventListener("click", () => {
+              const { module } = row.dataset;
+              const modules = coverageState.filters.Module;
+              modules.has(module)
+                ? modules.delete(module)
+                : modules.add(module);
+              keepInPlace(row, renderCoverage, () =>
+                findByData(sections.coverage, ".chart-row", "module", module),
+              );
+            }),
+          );
+        sections.coverage.querySelectorAll("[data-view]").forEach((button) =>
+          button.addEventListener("click", () => {
+            coverageState.view = button.dataset.view;
+            renderCoverage();
+          }),
+        );
+        sections.coverage.querySelectorAll("th[data-sort]").forEach((header) =>
+          header.addEventListener("click", () => {
+            const { sort } = header.dataset;
+            coverageState.sortAsc =
+              coverageState.sortKey === sort ? !coverageState.sortAsc : true;
+            coverageState.sortKey = sort;
+            renderCoverage();
+          }),
+        );
+        sections.coverage
+          .querySelectorAll("tbody tr[data-path]")
+          .forEach((row) =>
+            row.addEventListener("click", () => {
+              const { path } = row.dataset;
+              if (coverageState.view === "folders") {
+                coverageState.view = "files";
+                coverageState.search = `${path}/`.toLowerCase();
+                coverageState.selected = null;
+                renderCoverage();
+                return;
+              }
+              coverageState.selected =
+                coverageState.selected === path ? null : path;
+              keepInPlace(row, renderCoverage, () =>
+                findByData(
+                  sections.coverage,
+                  "tbody tr[data-path]",
+                  "path",
+                  path,
+                ),
+              );
+            }),
+          );
+      }
+
+      function renderViewer() {
+        const viewer = document.getElementById("viewer");
+        const file = DATA.coverage.find(
+          (item) => item.path === coverageState.selected,
+        );
+        if (!viewer || !file) return;
+        const partial = new Set(file.partialLines);
+        viewer.innerHTML = `
+          <div class="viewer">
+            <div class="viewer-head">
+              <span class="file-path">${splitPath(file.path)}</span>
+              <span class="legend"><span${helpAttr("notRun")}><i style="background: var(--line-miss)"></i>${t().notRun}</span><span${helpAttr("partial")}><i style="background: var(--line-partial)"></i>${t().branchNotTaken}</span></span>
+              <button class="link-button" id="next-miss">${t().nextUncovered}</button>
+              <button class="link-button" id="close-viewer">${t().close}</button>
+            </div>
+            <div class="code" id="code">${
+              file.source
+                ? file.source
+                    .split("\n")
+                    .map((text, index) => {
+                      const number = index + 1;
+                      const hits = file.lines[number];
+                      const state =
+                        hits === 0
+                          ? "miss"
+                          : partial.has(number)
+                            ? "partial"
+                            : "";
+                      return `<div class="code-line ${state}" data-line="${number}"><span class="ln">${number}</span><span class="hits">${hits === undefined ? "" : `${hits}×`}</span><span class="src">${escapeHtml(text) || " "}</span></div>`;
+                    })
+                    .join("")
+                : `<div class="empty">${t().sourceMissing}</div>`
+            }</div>
+          </div>`;
+        document
+          .getElementById("close-viewer")
+          .addEventListener("click", () => {
+            const path = coverageState.selected;
+            const row = findByData(
+              sections.coverage,
+              "tbody tr[data-path]",
+              "path",
+              path,
+            );
+            coverageState.selected = null;
+            keepInPlace(row, renderCoverage, () =>
+              findByData(
+                sections.coverage,
+                "tbody tr[data-path]",
+                "path",
+                path,
+              ),
+            );
+          });
+        let lastMiss = 0;
+        document.getElementById("next-miss").addEventListener("click", () => {
+          const misses = [
+            ...viewer.querySelectorAll(".code-line.miss, .code-line.partial"),
+          ];
+          if (!misses.length) return;
+          const next =
+            misses.find((line) => Number(line.dataset.line) > lastMiss) ??
+            misses[0];
+          lastMiss = Number(next.dataset.line);
+          const code = document.getElementById("code");
+          code.scrollTop = next.offsetTop - code.offsetTop - 40;
+        });
+      }
+
+      function renderAll() {
+        renderHeader();
+        renderTests();
+        renderCoverage();
+      }
+      renderAll();
+    </script>
+  </body>
+</html>
